@@ -1,74 +1,48 @@
 from lexer import Token, Lexer
 
+OPCODES = {"NOP", "LDA", "STA", "LDIA", "LDIB", "MOVAB", "MOVBA", "LDB", "STB", "ADD", "SUB", "JMP", "JZ", "JNZ", "OUT", "HLT"}      
+NEEDS_OPERAND = {"LDA", "STA", "LDIA", "LDIB", "LDB", "STB", "ADD", "SUB", "JMP", "JZ", "JNZ"}
 
+class InstructionNode:
 
-class TreeNode:
-
-	def __init__(self, token: Token, right, left):
-		self.token = Token
-		self.right = right
-		self.left = left
-
-	@property
-	def token(self) -> str:
-		return self._token
-
-
-	@token.setter
-	def token(self, value):
-		if not isinstance(value, Token):
-			raise ValueError("Token must be of Token type!")
-		self._token = value
-
-	@property
-	def right(self) -> str:
-		return self._right
-
-
-	@right.setter
-	def right(self, value):
-		if not isinstance(value, TreeNode) and value != None:
-			raise ValueError("Right must be of type TreeNode or None")
-		self._right = value
+	def __init__(self, opcode: str, operand=None):
+		self.opcode = opcode
+		self.operand = operand
+		self.next = None
 
 
 	@property
-	def left(self) -> str:
-		return self._left
+	def opcode(self) -> str:
+		return self._opcode
 
 
-	@left.setter
-	def left(self, value):
-		if not isinstance(value, TreeNode) and value != None:
-			raise ValueError("Left must be of type TreeNode or None")
-		self._left = value
-
-
-
-class ASTree:
-
-	def __init__(self, root):
-		self.root = root
+	@opcode.setter
+	def opcode(self, value):
+		if value not in OPCODES:
+			raise ValueError("Opcode is invalid")
+		self._opcode = value
 
 
 	@property
-	def root(self):
-		return self._root
+	def next(self) -> str:
+		return self._next
 
 
-	@root.setter
-	def root(self, value):
-		if not isinstance(value, TreeNode):
-			raise ValueError("Root must be of type TreeNode")
-		self._root = value
+	@next.setter
+	def next(self, value):
+		if not isinstance(value, InstructionNode) and value != None:
+			raise ValueError("Next must be of type InstructionNode or None")
+		self._next = value
+
+
 
 
 class Parser:
 
-
 	def __init__(self, lexer):
 		self.lexer = lexer
-		self.ast = None
+		self.instruction_list = None
+		self.tail = None
 
 
 	@property
@@ -77,7 +51,7 @@ class Parser:
 
 
 	@lexer.setter
-	def lexer(self, value)	:
+	def lexer(self, value):
 		if not isinstance(value, Lexer):
 			raise ValueError("Lexer must be of type Lexer")
 		self._lexer = value
@@ -94,9 +68,58 @@ class Parser:
 		operand     = NUMBER token   
 
 		'''
+		tokens = iter(self.lexer)
 
-		# generate the AST here
+		# generate the instruction list here
 
-		return self.ast
+		for token in self.lexer:
+			# need to build the instructions based off of the rules
+			if token.type == "OPCODE":
+				instruction = token.value
+
+				if instruction in NEEDS_OPERAND:
+					# the instruction expects an operand in the next token
+					# need to check the next token
+					try:                                                                                                                                                           
+						next_token = next(self.lexer)                                                                                                                              
+					except StopIteration:                                                                                                                                        
+						raise ValueError(f"Expected operand for instruction: {instruction}") 
+					
+					if next_token.type != "NUMBER":
+						raise RuntimeError(f"Expected operand for this instruction: {instruction}")
+
+
+					number = next_token.value
+
+					if number.startswith("0b") or number.startswith("0B"):
+						# binary number
+						number = int(number, 2)
+					elif number.startswith("0x") or number.startswith("0X"):
+						# hex number
+						number = int(number, 16)
+					else:
+						# decimal number
+						number = int(number, 10)
+					
+					node = InstructionNode(instruction, number)
+				else:
+					# the instruction does not need an operand
+					node = InstructionNode(instruction)
+				# append the node to the list
+				if self.instruction_list is None:
+					self.instruction_list = node
+					self.tail = node
+				else:
+					# append to the end of the list
+					self.tail.next = node
+					self.tail = node
+			
+			else:
+				raise RuntimeError(f"Unrecognized type for token: {token}")
+		
+
+
+
+		return self.instruction_list
 
 	

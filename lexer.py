@@ -59,6 +59,7 @@ class Lexer:
 		self.line = 0
 		self.column = 0
 
+
 	def __iter__(self):
 
 		'''
