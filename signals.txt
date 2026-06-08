@@ -1,0 +1,161 @@
+Signals
+
+14 total input signals (Outputs from Control Unit)
+
+2 total output signals (Inputs to Control Unit)
+
+
+	A Register (clk)
+		load (active low; input)
+		OE   (active low; input)
+
+	B Register (clk)
+		load (active low; input)
+		OE   (active low; input)
+
+	ROM (async)
+		OE   (active low; input)
+
+	Instruction Register (clk)
+		load (active low; input)
+		OE   (active low; input)
+
+	PC (clk)
+		load (active low; input)
+
+	RAM/MAR (clk MAR) (async RAM)
+		load MAR (active low; input)
+		WE       (active low; input)
+		OE       (active low; input)
+
+	Output Register (clk)
+		load (active low; input)
+
+	ALU (async)
+		OE       (active low; input)
+		OP       (0 add, 1 sub; input)
+		Carry    (output)
+		Zero     (output)
+
+
+
+
+
+Instructions
+
+	LDA addr:
+		Input addr to RAM
+		RAM writes to data bus
+		A register reads from the bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	STA addr:
+		A register writes to the data bus
+		RAM reads from data bus and loads the value
+
+		Signals/Steps
+			(1) 
+			(2)
+
+	LDI val:
+		Control unit writes value to data bus
+		A register reads from the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	LDI B,val:
+		Control unit writes value to data bus
+		B register reads from the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	MOV A,B:
+		B register writes to the data bus
+		A register reads from the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	MOV B,A:
+		A register writes to the data bus
+		B register reads from the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	LDB addr:
+		Input addr to RAM
+		RAM writes to data bus
+		B register reads from the bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	STB addr:
+		B register writes to the data bus
+		RAM reads from data bus and loads the value
+
+		Signals/Steps
+			(1)
+			(2)
+
+	ADD addr:
+		ALU writes to data bus
+		RAM reads from data bus and loads the value
+
+		Signals/Steps
+			(1)
+			(2)
+
+	SUB addr:
+		ALU writes to data bus
+		RAM reads from data bus and loads the value
+
+		Signals/Steps
+			(1)
+			(2)
+		
+	JMP addr:
+		Control unit writes the addr to the data bus
+		PC reads from the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	JZ addr:
+		if zero flag is 1
+			Control unit writes the addr to the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	JNZ addr:
+		if zero flag is 0
+			Control unit writes the addr to the data bus
+
+		Signals/Steps
+			(1)
+			(2)
+
+	OUT:
+		A register writes to the bus
+		OUT register reads from the bus 
+
+		Signals/Steps
+			(1)
+			(2)
+
+	HLT:
+	

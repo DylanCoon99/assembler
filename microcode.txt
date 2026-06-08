@@ -1,0 +1,179 @@
+** Will probably need a signal to send to the clk for the HLT instruction
+
+
+
+Instruction Set Architecture
+
+0    00000    NOP          No operation
+1    00001    LDA addr     A <- RAM[addr]
+2    00010    STA addr     RAM[addr] <- A
+3    00011    LDI val      A <- val
+4    00100    LDI B,val    B <- val
+5    00101    MOV A,B      A <- B
+6    00110    MOV B,A      B <- A
+7    00111    LDB addr     B <- RAM[addr]
+8    01000    STB addr     RAM[addr] <- B
+9    01001    ADD addr     RAM[addr] <- A + B
+10   01010    SUB addr     RAM[addr] <- A - B
+11   01011    JMP addr     PC <- addr
+12   01100    JZ addr      PC <- addr if zero
+13   01101    JNZ addr     PC <- addr if not zero
+14   01110    OUT          OUT <- A
+15   01111    HLT          Stop Clk
+
+
+
+** I think that the "B" input for the ALU should be wired to the data bus. ALU would need to be able to read from the bus.
+
+
+
+Describe what instruction does
+
+NOP -> Do nothing
+
+LDA addr:
+	Control unit writes address to data bus
+	RAM reads address from the data bus
+	RAM writes to data bus
+	A register reads from the bus
+
+STA addr:
+	A register writes to the data bus
+	RAM reads from data bus and loads the value
+
+LDI val:
+	Control unit writes value to data bus
+	A register reads from the data bus
+
+LDI B,val:
+	Control unit writes value to data bus
+	B register reads from the data bus
+
+MOV A,B:
+	B register writes to the data bus
+	A register reads from the data bus
+
+MOV B,A:
+	A register writes to the data bus
+	B register reads from the data bus
+
+LDB addr:
+	Input addr to RAM
+	RAM writes to data bus
+	B register reads from the bus
+
+STB addr:
+	B register writes to the data bus
+	RAM reads from data bus and loads the value
+
+ADD addr:
+	ALU writes to data bus
+	RAM reads from data bus and loads the value
+
+SUB addr:
+	ALU writes to data bus
+	RAM reads from data bus and loads the value
+	
+JMP addr:
+	Control unit writes the addr to the data bus
+	PC reads from the data bus
+
+JZ addr:
+	if zero flag is 1: Control unit writes the addr to the data bus
+
+JNZ addr:
+	if zero flag is 0: Control unit writes the addr to the data bus
+
+OUT:
+	A register writes to the bus
+	OUT register reads from the bus
+
+HLT:
+	
+
+
+
+
+
+
+How the Control Unit will work:
+
+
+Requirements
+
+	Inputs:
+		ALU carry out
+		ALU zero flag
+		Instruction bus
+
+	Outputs:
+		14 signals
+		Instruction bus
+
+	Needs to be able to
+	count and store it's 
+	state. Represents the
+	step. (need to determine
+	how many bits the counter
+	needd to be)
+
+	Hardware
+		- 2 EEPROMs
+		- 3 tristate transceivers (8 bits each)
+			- need to be able to read from
+			Instruction bus and write to the
+			data bus
+		- 4 bit counter
+		- logic for checking if on last step for
+		the current instruction (just need to check)
+		one bit
+			- this one bit will trigger the
+
+
+Control unit will need signals
+
+Signals
+
+	Load (IB)
+	OE (DB)
+
+
+	Reset: resets the counter (happens after each instruction is done)
+
+
+
+* When the last step bit is witnessed -> reset counter
+	- could use AND gate
+
+
+I think we need registers to latch what is fetched
+from the LUT. Otherwise how else would we keep it?
+
+
+
+
+Control Flow
+	(1) Input Instruction (latched)
+		- Read from instruction bus (load)
+
+	(2) Fetch from LUT using Opcode + step
+
+	(3) Output the signal and if necessary 
+	write to the data bus
+
+	(4) Check if we are on the
+	last step (pick a bit to
+	represent the last step)
+
+	(5) If on last step -> need to fetch
+	next instruction
+		- Initialize counter to 0 (step)
+
+	(6) If not increment the counter and 
+	fetch from LUT
+
+
+
+
+
+
