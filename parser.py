@@ -72,7 +72,7 @@ class Parser:
 
 		# generate the instruction list here
 
-		for token in self.lexer:
+		for token in tokens:
 			# need to build the instructions based off of the rules
 			if token.type == "OPCODE":
 				instruction = token.value
@@ -81,7 +81,7 @@ class Parser:
 					# the instruction expects an operand in the next token
 					# need to check the next token
 					try:                                                                                                                                                           
-						next_token = next(self.lexer)                                                                                                                              
+						next_token = next(tokens)                                                                                                                              
 					except StopIteration:                                                                                                                                        
 						raise ValueError(f"Expected operand for instruction: {instruction}") 
 					
