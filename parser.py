@@ -34,6 +34,8 @@ class InstructionNode:
 			raise ValueError("Next must be of type InstructionNode or None")
 		self._next = value
 
+	def __repr__(self):
+		return f"Opcode: {self.opcode}  Operand: {self.operand}"
 
 
 
