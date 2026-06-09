@@ -1,5 +1,6 @@
 from parser import Parser
 
+ROM_SIZE = 32768
 
 
 OPCODE_MAP = {
@@ -25,9 +26,9 @@ OPCODE_MAP = {
 class Assembler:
 
 
-	def __init__(self, parser: Parser, output: str):
+	def __init__(self, parser: Parser, output_name: str):
 		self.parser = parser
-		self.output = output
+		self.output = output_name
 
 
 	@property
@@ -50,25 +51,32 @@ class Assembler:
 
 	def assemble(self):
 
-		code = []
+		lower_bytes = []
+		upper_bytes = []
 
 		instructions = self.parser.parse()
 		current = instructions
 
 		while current != None:
 			opcode = OPCODE_MAP[current.opcode]
-			operand = current.operand if current.operand else 0
+			operand = current.operand if current.operand is not None else 0
 
-			instr = int(f"{opcode:08b}{operand:08b}", 2).to_bytes(2, byteorder='big')
-			code.append(instr)
+			lower_instr = operand.to_bytes(1, byteorder='big')
+			upper_instr = opcode.to_bytes(1, byteorder='big')
+			lower_bytes.append(lower_instr)
+			upper_bytes.append(upper_instr)
 			current = current.next
 
 
-		with open(self.output, "wb") as f:
-			for line in code:
-				f.write(line)
+		with open(f"{self.output}_lower.bin", "wb") as f_lower, open(f"{self.output}_upper.bin", "wb") as f_upper:
+			for line in lower_bytes:
+				f_lower.write(line)
+			for line in upper_bytes:
+				f_upper.write(line)
+			f_lower.write(b'\x00' * (ROM_SIZE - len(lower_bytes)))
+			f_upper.write(b'\x00' * (ROM_SIZE - len(upper_bytes)))
 			
 
-		return
+		return 
 
 
